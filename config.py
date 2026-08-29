@@ -1,0 +1,2 @@
+COLLECTION_INTERVAL = 5
+TELEMETRY_FILE = "telemetry.jsonl"

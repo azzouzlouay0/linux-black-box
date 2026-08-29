@@ -5,7 +5,7 @@ from collector.system_collector import collect_system
 from storage.json_writer import write_snapshot
 
 
-INTERVAL = 5
+from config import COLLECTION_INTERVAL
 
 
 def main():
@@ -24,7 +24,7 @@ def main():
                 f"Processes={len(processes)}"
             )
 
-            time.sleep(INTERVAL)
+            time.sleep(COLLECTION_INTERVAL)
 
     except KeyboardInterrupt:
         print("\nLinux Black Box stopped")

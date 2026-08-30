@@ -2,7 +2,10 @@
 __pycache__/
 *.pyc
 .env
+
 telemetry.jsonl
 events.jsonl
+alerts.jsonl
+
 *.log
 .pytest_cache/

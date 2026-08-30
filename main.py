@@ -3,7 +3,10 @@ import time
 from collector.process_event_detector import ProcessEventDetector
 from collector.process_collector import collect_processes
 from collector.system_collector import collect_system
+
 from storage.json_writer import write_snapshot
+from storage.event_writer import write_process_event
+
 from config import COLLECTION_INTERVAL
 
 
@@ -18,10 +21,10 @@ def main():
             system = collect_system()
             processes = collect_processes()
 
-            # Detect process start and exit events
+            # Detect started and exited processes
             started, exited = detector.detect(processes)
 
-            # Display newly started processes
+            # New processes
             for process in started:
                 print(
                     f"[PROCESS_STARTED] "
@@ -31,7 +34,12 @@ def main():
                     f"COMMAND={process.command}"
                 )
 
-            # Display exited processes
+                write_process_event(
+                    "PROCESS_STARTED",
+                    process
+                )
+
+            # Exited processes
             for process in exited:
                 print(
                     f"[PROCESS_EXITED] "
@@ -39,17 +47,20 @@ def main():
                     f"NAME={process.name}"
                 )
 
-            # Save telemetry snapshot
+                write_process_event(
+                    "PROCESS_EXITED",
+                    process
+                )
+
+            # Save full system snapshot
             write_snapshot(system, processes)
 
-            # Display system summary
             print(
                 f"CPU={system.cpu_percent}% | "
                 f"RAM={system.memory_percent}% | "
                 f"Processes={len(processes)}"
             )
 
-            # Wait before next collection
             time.sleep(COLLECTION_INTERVAL)
 
     except KeyboardInterrupt:

@@ -8,6 +8,7 @@ def write_process_event(event_type, process):
     event = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "type": event_type,
+        "source": "psutil",
         "pid": process.pid,
         "ppid": process.ppid,
         "username": process.username,
@@ -15,5 +16,13 @@ def write_process_event(event_type, process):
         "command": process.command,
     }
 
+    _write_event(event)
+
+
+def write_ebpf_event(event):
+    _write_event(event)
+
+
+def _write_event(event):
     with open(EVENTS_FILE, "a", encoding="utf-8") as file:
         file.write(json.dumps(event) + "\n")

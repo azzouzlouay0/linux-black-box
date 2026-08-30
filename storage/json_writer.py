@@ -1,16 +1,18 @@
 import json
 from datetime import datetime, timezone
 
-
-OUTPUT_FILE = "telemetry.jsonl"
+from config import TELEMETRY_FILE
 
 
 def write_snapshot(system, processes):
     snapshot = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "system": system.to_dict(),
-        "processes": [p.to_dict() for p in processes],
+        "processes": [
+            process.to_dict()
+            for process in processes
+        ],
     }
 
-    with open(OUTPUT_FILE, "a", encoding="utf-8") as file:
+    with open(TELEMETRY_FILE, "a", encoding="utf-8") as file:
         file.write(json.dumps(snapshot) + "\n")

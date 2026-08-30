@@ -3,6 +3,7 @@ import time
 from collector.process_event_detector import ProcessEventDetector
 from collector.process_collector import collect_processes
 from collector.system_collector import collect_system
+from collector.ebpf_exec_collector import EbpfExecCollector
 
 from storage.json_writer import write_snapshot
 from storage.event_writer import write_process_event
@@ -14,17 +15,18 @@ def main():
     print("Linux Black Box started")
 
     detector = ProcessEventDetector()
+    ebpf_collector = EbpfExecCollector()
+
+    print("Starting eBPF process collector...")
+    ebpf_collector.start()
 
     try:
         while True:
-            # Collect current system information
             system = collect_system()
             processes = collect_processes()
 
-            # Detect started and exited processes
             started, exited = detector.detect(processes)
 
-            # New processes
             for process in started:
                 print(
                     f"[PROCESS_STARTED] "
@@ -36,10 +38,9 @@ def main():
 
                 write_process_event(
                     "PROCESS_STARTED",
-                    process
+                    process,
                 )
 
-            # Exited processes
             for process in exited:
                 print(
                     f"[PROCESS_EXITED] "
@@ -49,10 +50,9 @@ def main():
 
                 write_process_event(
                     "PROCESS_EXITED",
-                    process
+                    process,
                 )
 
-            # Save full system snapshot
             write_snapshot(system, processes)
 
             print(
@@ -64,7 +64,11 @@ def main():
             time.sleep(COLLECTION_INTERVAL)
 
     except KeyboardInterrupt:
-        print("\nLinux Black Box stopped")
+        print("\nStopping Linux Black Box...")
+
+    finally:
+        ebpf_collector.stop()
+        print("Linux Black Box stopped")
 
 
 if __name__ == "__main__":
